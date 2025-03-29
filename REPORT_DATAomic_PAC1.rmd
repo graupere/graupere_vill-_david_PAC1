@@ -114,18 +114,21 @@ assay_index <- substr(matriu_metabolica_DATA$`Metabolite_name Factors`,
                     nchar(matriu_metabolica_DATA$`Metabolite_name Factors`)-4,
                     nchar(matriu_metabolica_DATA$`Metabolite_name Factors`))
 
-mostra_index <- substr(SAMPLE_DATA$metabolite_name, 
-                    nchar(SAMPLE_DATA$metabolite_name)-4,
-                    nchar(SAMPLE_DATA$metabolite_name))
-
-SAMPLE_DATA_ord <- SAMPLE_DATA[match(assay_index, mostra_index),]
-rownames(SAMPLE_DATA_ord) <-matriu_metabolica_DATA$`Metabolite_name Factors`
-
 SUBJECT <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/SUBJECT.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE, col_names = FALSE)  
 
 SAMPLE_DATA <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/SAMPLE_DATA.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
 
 REST <- read.delim("C:/Users/graup/Desktop/DATAomic/PAC1/REST.txt", header=FALSE, comment.char="#")
+
+mostra_index <- substr(SAMPLE_DATA$metabolite_name, 
+                    nchar(SAMPLE_DATA$metabolite_name)-4,
+                    nchar(SAMPLE_DATA$metabolite_name))
+
+SAMPLE_DATA_ord <- SAMPLE_DATA[match(assay_index, mostra_index),]
+
+rownames(SAMPLE_DATA_ord) <-matriu_metabolica_DATA$`Metabolite_name Factors`
+
+
 ```
 
 
