@@ -1,0 +1,271 @@
+---
+title: "REPORT DATAomic_PAC1"
+subtitle: "Identification of temperature-sensitive modifications in Thermococcus kodakarensis"
+author: "david graupere"
+date: '`r format(Sys.Date(),"%e de %B, %Y")`'
+output:
+   pdf_document:
+     toc: true
+     toc_depth: 3
+     number_sections: false
+     latex_engine: xelatex 
+header-includes:
+  - \usepackage{tocloft}
+  - \setlength{\cftbeforesecskip}{0.5em}
+  - \renewcommand{\cftdot}{}
+---
+
+
+Study ID	ST003725
+Study Title	Identification of temperature-sensitive modifications in Thermococcus kodakarensis
+Study Summary	Nucleoside analysis of total RNA and RNA subfractions from T. kodakarensis grown at 65, 75, 85 and 95 degree Celcius.
+Institute	
+New England Biolabs
+Last Name	Tsai
+First Name	Yueh-Lin
+Address	44 Dunham Ridge, Beverly, MA 01915
+Email	atsai@neb.com
+Phone	978-380-6587
+Submit Date	2025-02-01
+Raw Data Available	Yes
+Raw Data File Type(s)	d
+Analysis Type Detail	LC-MS
+Release Date	2025-02-14
+Release Version	1
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries, include=FALSE}
+library(knitr)
+library(rmarkdown)
+library(readr)
+```
+
+A mesura que a hom li calgui nous paquets, cal instal·lar-los però no pas des de Rstudio o amb installpack, sinó que sempre cal emprar aquesta instrucció perquè el repositori que els conté és un altre.
+```{r include=FALSE}
+if(!require(SummarizedExperiment)) {
+BiocManager::install("SummarizedExperiment")
+}
+library(SummarizedExperiment)
+```
+
+
+# **1. Taula de continguts**. Per facilitar la navegació i mostrar l'estructura del document. (1/2 pàgina)
+
+# **2. Abstract o resum**. Breu resum sobre el procés i els principals resultats. (150 paraules)
+
+## **2.1 Anàlisi Completa de Nucleòsids dels Perfils de Modificació d'ARN d'Arqueus**
+
+Els recercadors estudien petits organismes anomenats arqueus que poden viure en ambients extrems, com ara a dins d'aigua termal. Els arqueus tenen una mena d'ARN especial (una molècula semblant a l'ADN que ajuda a la creació de proteïnes i d'altres funcions cel·lulars), en el qual hi han  canvis químics (altrament dit modificacions) que són d'ajut per tal de sobreviure en condicons extremes. 
+
+Les diferents temperatures, a les quals hom cultiva els arqueus com el Thermococcus kodakarensis, una espècie hipertermòfila, assenyalen que creix millor a temperatures molt altes. L'estudi observa com les modificacions en l'ARN d'aquestes arquees canvien en resposta a les temperatures a les quals són exposades; aquestes modificacions poden ajudar a les arquees a adaptar-se millor i sobreviure en ambients extremadament calents. I és aquí que hom centra el projecte de recerca en trobar noves menes de modificacions d'ARN (mitjançant el mètode LC-MS/MS) en diferentes parts del seu ARN a diferentes temperatures. 
+
+El descobriment principal és una funció enzimàtica específica (una metiltransferasa, una proteïna enzimàtica, que és capaç de realitzar la modificació m7G sobre l'ARN; altrament dit hom ha identificat el gen que codifica per aquesta metiltransferasa i han demostrat que aquesta proteïna enzimàtica és la responsable d'afegir el grup metil a la guanosina en una posició específica de l'ARN ribosòmic 23S). La modificació m7G ja era coneguda, però el mecanisme i l'enzim específic que la realitza en aquest context particular (en el bucle P del 23S rRNA) és el que ha estat descobert. 
+
+Les modificacions d'ARN -com la m7G- podrien esser clau en aquest procés d'adaptació, perquè poden afectar la manera en què l'ARN interactua amb altres biomolècules o com és traduït a proteïnes. L'estudi mostra que l'abundància d'aquestes modificacions varia en resposta a la temperatura, cosa que suggereix que són elements dinàmics que contribueixen a la capacitat dels organismes per manejar els canvis en el seu entorn.
+
+Les modificacions d'ARN poden ajudar a estabilitzar l'estructura de l'ARN o a modificar la seva funció per optimitzar la maquinària cel·lular sota aquestes condicions extremes. Això implica que -a mesura que la temperatura puja- els organismes hipertermòfils poden requerir ajusts específics a escala molecular a fi de garantir que les seves funcions biològiques segueixin essent eficientes.
+
+Els recercadors també han pogut demostrar que la seva metodologia (emprant LC-MS/MS) és vàlida per a identificar altres enzims que duguin a terme funcions semblants a dins de l'ARN.
+
+# 3. **Objectius**. Els objectius del vostre treball han de ser breus, clars i ben definits. (1/2 pàgina)
+
+# 4. **Mètodes**: Amb què heu treballat. Variarà segons el cas, però habitualment contindrà (1-2 pàgines): 
+
+
+## **4.1 origen (font)** 
+
+La font d'aquestes dades és el banc de dades públic de UCSD Metabolomics Workbench, un recurs patrocinat pel Fons Comú dels Instituts Nacionals de Salut americans
+
+Font: https://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=StudySummary&SortBy=release_date&AscDesc=desc&ResultsPerPage=100
+
+metadata: https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study&StudyID=ST003725&StudyType=MS&ResultType=1
+
+
+### **4.1.1 dataset de metabolòmica de metabolomicsWorkbench**  
+
+Ha estat essencial tenir en compte aquests dos docs:
+1. httpswww.metabolomicsworkbench.orgdatatutorials.php
+   chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.metabolomicswork    bench.org/data/tutorials/NMDR_browsing_searching.pdf
+   IMP: pàg. 7 
+3. SummarizedExperiment 
+   for Coordinating Experimental Assays, Samples, and Regions of Interest
+   Martin Morgan, Valerie Obenchain, Jim Hester, Hervé Pagès
+   Revised: 5 Jan, 2023
+
+```{r ST003725_AN006111 include=FALSE, results='asis'}
+matriu_metabolica_DATA <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/DATA.txt",delim = "\t", escape_double = FALSE,  trim_ws=TRUE,show_col_types = FALSE, col_names = FALSE)
+
+noms_col <- paste0(as.character(matriu_metabolica_DATA[1,]), " ", as.character(matriu_metabolica_DATA[2,]))
+colnames(matriu_metabolica_DATA) <- noms_col
+matriu_metabolica_DATA <- matriu_metabolica_DATA[-c(1:2),]
+  
+
+# la rawData va amb les files de l'assay i la colData amb les columnes de l'assay 
+# ara cal ordenar els noms de les files de la matriu amb els noms de les files de la SAMPLE_DATA (però hi han caràcters diferents i no tots els noms lliguen, així que he agafat sols els 5 darrers caràcters de cada nom com a índex per a totes dues, els qual oisí que coincideixen en tots dos fitxers)
+
+assay_index <- substr(matriu_metabolica_DATA$`Metabolite_name Factors`, 
+                    nchar(matriu_metabolica_DATA$`Metabolite_name Factors`)-4,
+                    nchar(matriu_metabolica_DATA$`Metabolite_name Factors`))
+
+mostra_index <- substr(SAMPLE_DATA$metabolite_name, 
+                    nchar(SAMPLE_DATA$metabolite_name)-4,
+                    nchar(SAMPLE_DATA$metabolite_name))
+
+SAMPLE_DATA_ord <- SAMPLE_DATA[match(assay_index, mostra_index),]
+rownames(SAMPLE_DATA_ord) <-matriu_metabolica_DATA$`Metabolite_name Factors`
+
+SUBJECT <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/SUBJECT.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE, col_names = FALSE)  
+
+SAMPLE_DATA <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/SAMPLE_DATA.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+
+REST <- read.delim("C:/Users/graup/Desktop/DATAomic/PAC1/REST.txt", header=FALSE, comment.char="#")
+```
+
+
+## **4.2 naturalesa (tipus) de les dades** 
+
+### **4.2.1 Creació d'un objecte de classe SummarizedExperiment amb les dades i les metadades**
+
+Aquest objecte té informació sobre el dataset, les seves files i columnes. La classe SummarizedExperiment és una extensió d'ExpressionSet, utilitzada per moltes aplicacions i bases de dades (com és el cas de metabolomicsWorkbench).
+
+Hom inclou el dataset matriu_metabolica  al summarizedExperiment
+```{r}
+
+SUM_exp <- SummarizedExperiment(
+assays = list(counts=as.matrix(matriu_metabolica_DATA[,-c(1,2)])), 
+rowData = SAMPLE_DATA_ord,
+,colData=DataFrame(sample_info=colnames(matriu_metabolica_DATA)[-c(1,2)]))
+
+metadata(SUM_exp)$SUBJECT <- SUBJECT
+metadata(SUM_exp)$REST <- REST
+
+
+SUM_exp
+```
+ 
+
+
+
+
+### **4.2.2 principals diferències de la classe `SummarizedExperiment` versus la classe `ExpressionSet`**
+
+```{r results='asis'}
+suppressPackageStartupMessages(library(kableExtra))
+requadre <- data.frame(
+  `SummarizedExperiment` = c(
+"aquesta classe pertany al paquet del mateix nom SummarizedExperiment del projecte Bioconductor",
+"contenidor més flexible (s'adapta a una gran varietat de menes de dades)",
+"té com a components principals:",
+"1. assays: llistat d'objectes matrix amb dades quantitatives (gens o transcrits versus mostres o condicions experimentals)", 
+"2. rowData: info sobre les files dels assays", 
+"3. colData: info sobre les columnes dels assays",
+"4. metadata: més d'info sobre l'assaig",
+""),
+  `ExpressionSet` = c(
+"aquesta classe pertany al paquet Biobase del projecte Bioconductor",
+"contenidor estàndard",
+"té com a components principals:", 
+"1. exprs: matriu amb les dades d'expressió gènica", 
+"2. phenoData: un objecte AnnotatedDataFrame amb info sobre les mostres (tractament mostres, condicions experimentals...)", 
+"3. featureData: un objecte AnnotatedDataFrame amb info sobre els trets mesurats (gens...)",
+"4. experimentData: info sobre l'assaig",
+"5. annotation: info sobre l'anotació del microarray"), 
+
+stringsAsFactors = FALSE
+)
+
+format_sortida <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+
+if (is.null(format_sortida)||format_sortida == "html"){
+  
+  taula_sortida <- kable(requadre, format="html")
+
+} else if (format_sortida == "latex"){
+  
+  taula_sortida <- kable(requadre, format="latex", booktabs=TRUE, align=c("p{7cm}","p{7cm}"),escape = FALSE)
+  
+  taula_sortida <- kable_styling(taula_sortida, latex_options = "striped", position = "center")
+  }
+
+print(taula_sortida)
+```
+
+
+## **4.3 metodologia emprada**
+
+
+## **4.4 eines estadístiques i bioinformàtiques utilitzades**
+https://www.metabolomicsworkbench.org/data/stats_toolbox.php?STUDY_ID=ST003725
+
+### *4.4.1 Les tecnologies òmiques*
+
+
+### *4.4.2 Bioconductor i SummarizedExperiment (les classes que s'utilitzen per emmagatzemar dades òmiques)*
+
+
+### *4.4.3 Git com a eina de control de versions, així com GitHub*
+
+
+### *4.4.4 Les eines estadístiques d'exploració de dades: Bioconductor i l'exploració multivariant de dades* 
+
+Font: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.metabolomicsworkbench.org/data/tutorials/NMDR_analysis_tools.pdf
+
+## **4.5 procediment general d'anàlisi**
+
+### **4.5.1 anàlisi exploratòria que us proporcioni una visió general del dataset**
+
+```{r}
+SUM_exp
+```
+
+
+
+Hom referma que es té una classe SummarizedExperiment amb unes dimensions de 99 files per 196 columnes   
+```{r}
+class(SUM_exp)
+summary(SUM_exp)
+dim(SUM_exp) #hom veu que té més d'un objecte: un dataset pot tenir diverses sèries, aquí n'hi han 98 
+```
+
+
+
+
+
+
+
+
+# 5. **Resultats**. Els resultats han de respondre a les preguntes plantejades. Sovint aquestes són obertes (ex. "Exploració de les dades") o admeten diferents interpretacions, així que podeu ser flexibles; però expliqueu sempre per què feu el que feu. Davant el dubte, consultau els materials i exemples de referència. 
+
+
+
+
+Les millors eines per redactar l'informe són Rmarkdown o Quarto 1, que permeten generar documents que integren codi, anàlisi, resultats i explicacions, i que són habitualment utilitzades en entorns professionals en bioinformàtica.
+
+És important que el vostre informe no sigui un bolcat de codi i sortides de R amb prou feines explicacions, ha de ser un text llegible i fàcil de seguir. Ajuts de taules, figures (amb els seus corresponents peus) i, si cal, codi per acompanyar les vostres explicacions. (4-5 pàgines)
+
+# 6. **Discussió**. És important que reflexioneu sobre les limitacions de l' estudi i sobre el treball que heu realitzat, en el context del problema biològic d'interès que aborda la PEC. (1 pàgina)
+
+# 7. **Conclusions**. Concises, clares i extretes de la vostra anàlisi. (1/2 pàgina)
+
+# 8. **Referències**. 
+## **8.1 Creau un repositori <graupere_villà_david_PAC1> de GitHub1** Aquí haureu d'incloure un enllaç al repositori de GitHub que conté el codi que heu utilitzat per abordar l'anàlisi (degudament comentat).
+
+==>El nom del repositori ha de ser 'Apellido1-Apellido2-Nombre-PEC1'. La direcció (URL) del repositori haurà d'estar inclosa en l'informe de manera clara. Teniu en compte que a través de CANVAS deveu lliurar únicament l'informe.
+
+==> repositori que contingui:
+1) l'informe, 
+2) l'objecte de classe SummarizedExperiment (que contingui les dades i les metadades en format binari (.Rda)),
+3) el codi R per a l'exploració de les dades degudament comentat (el control de versions del mateix s'ha de realitzar amb Git), 
+4) dades en format text i 
+5) les metadades acompanyades d'una breu descripció en un arxiu markdown
+
+
+
+L'extensió màxima de l'informe serà de 10 pàgines (sense comptar Annexos) en format PDF.
