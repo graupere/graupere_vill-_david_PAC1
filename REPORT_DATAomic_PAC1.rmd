@@ -99,6 +99,7 @@ Ha estat essencial tenir en compte aquests dos docs:
    Martin Morgan, Valerie Obenchain, Jim Hester, Hervé Pagès
    Revised: 5 Jan, 2023
 
+
 ```{r ST003725_AN006111 include=FALSE, results='asis'}
 matriu_metabolica_DATA <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/DATA.txt",delim = "\t", escape_double = FALSE,  trim_ws=TRUE,show_col_types = FALSE, col_names = FALSE)
 
@@ -224,18 +225,90 @@ Font: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.metabolomi
 
 ### **4.5.1 anàlisi exploratòria que us proporcioni una visió general del dataset**
 
+ l'objecte SUM_exp és un SummarizedExperiment i conté:
+
 ```{r}
 SUM_exp
 ```
 
 
 
-Hom referma que es té una classe SummarizedExperiment amb unes dimensions de 99 files per 196 columnes   
+1) *Una matriu d'assaig principal*, hom referma que aquest SummarizedExperiment té un única matriu principal amb unes dimensions de 98 files/trets (aquí metabòlits) per 196 columnes (mostres: un dataset pot tenir diverses sèries [un aplec de mostres sota condicions semblantes), aquí n'hi han 98]), però en pot tenir diverses (assayNames(SUM_exp))
+
+Sols hi ha una única matriu principal (n'hi poden haver diverses: "counts" [per a valors de mesures crues, per exemple, intensitats LC-MS], "log_counts"[dades transformades en log], "normalized_counts" [dades normalitzades: ajustades pels efectes dels lots <batch effects>]...)
 ```{r}
-class(SUM_exp)
-summary(SUM_exp)
-dim(SUM_exp) #hom veu que té més d'un objecte: un dataset pot tenir diverses sèries, aquí n'hi han 98 
+assayNames(SUM_exp)
+assays(SUM_exp)$counts[1:2,1:2]
 ```
+
+la funció assay() amb un <SummarizedExperiment> com a argument: retorna la matriu de dades amb les files com a variables (metabòlis) i les columnes com a mostres. La matriu de dades és un objecte que pot contenir múltiples matrius de dades (assaigs), cadascuna alineada a les mateixes files/trets (aquí metabòlits) i columnes (mostres). 
+```{r}
+assay(SUM_exp)[1,1:6]
+```
+
+
+2) *rowData*: metadades per a cada metabòlit (p. ex., nom,... 1 fila per funció),
+
+```{r}
+dim(rowData(SUM_exp))
+rowData(SUM_exp)[1:5,1:4]
+```
+
+
+
+3) *colData*: metadades per a cada mostra (p. ex., condició, temperatura), aquí hom no hi inclou el megafitxer de mesures originals, és un fitxer de fitxers de big data crua (encara que -si cal- hom pot connectar el megafitxer al colData o metadata per mitjà de links i així garantir-ne la traçabilitat)
+
+la class(colData()) que retorna la informació sobre covariables, un objecte tipus Dframe és de classe S4, és a dir, és un data.frame avançat perquè permet gestionar el metadata i és dissenyat per treballar amb models de data més complexos (compatible amb Bioconductor)
+```{r}
+class(colData(SUM_exp))
+dim(colData(SUM_exp))
+#hom pot accedir a les columnes
+colData(SUM_exp)$sample_info[1]
+```
+
+
+Hom pot agrupar per mena de variable (temperatura, la mena d'ARN... ) però aquí cal familiaritzar-se amb l'interllenguatge <regex> 
+```{r}
+library(stringr)
+colData(SUM_exp)$temperatura <- str_extract(colData(SUM_exp)$sample_info, "temperature:\\d+C")
+table(colData(SUM_exp)$temperatura)
+```
+
+
+
+
+```{r}
+sample_names <- colnames(SUM_exp)
+parts <- str_split(sample_names, "_")
+parts5 <- sapply(parts, function(x) x[5])
+parts5_trencat <- str_split(parts5, "[- ]")
+
+unique(colData(SUM_exp)$especie <- sapply(parts, function(x) x[1]))
+unique(colData(SUM_exp)$fraccio_ARN_mostra<- sapply(parts, function(x) x[2]))
+
+unique(colData(SUM_exp)$modificacio <- sapply(parts, function(x) grep("^(AU|pseudoU|GC)$",x,value = TRUE)[1]))
+
+unique(colData(SUM_exp)$temperatura <- sapply(parts, function(x) grep("5C",x,value = TRUE)[1]))
+
+
+unique(colData(SUM_exp)$rep <- sapply(parts5_trencat, function(x) x[1]))
+unique(colData(SUM_exp)$rep <- sapply(parts5_trencat, function(x) x[2]))
+
+```
+
+
+
+
+4) *metadata*: altra informació general com SUBJECT, REST, etc.  
+
+
+
+
+
+
+
+
+
 
 
 
@@ -245,9 +318,6 @@ dim(SUM_exp) #hom veu que té més d'un objecte: un dataset pot tenir diverses s
 
 
 # 5. **Resultats**. Els resultats han de respondre a les preguntes plantejades. Sovint aquestes són obertes (ex. "Exploració de les dades") o admeten diferents interpretacions, així que podeu ser flexibles; però expliqueu sempre per què feu el que feu. Davant el dubte, consultau els materials i exemples de referència. 
-
-
-
 
 Les millors eines per redactar l'informe són Rmarkdown o Quarto 1, que permeten generar documents que integren codi, anàlisi, resultats i explicacions, i que són habitualment utilitzades en entorns professionals en bioinformàtica.
 
@@ -260,15 +330,15 @@ Les millors eines per redactar l'informe són Rmarkdown o Quarto 1, que permeten
 # 8. **Referències**. 
 ## **8.1 Creau un repositori <graupere_villà_david_PAC1> de GitHub1** Aquí haureu d'incloure un enllaç al repositori de GitHub que conté el codi que heu utilitzat per abordar l'anàlisi (degudament comentat).
 
-==>El nom del repositori ha de ser 'Apellido1-Apellido2-Nombre-PEC1'. La direcció (URL) del repositori haurà d'estar inclosa en l'informe de manera clara. Teniu en compte que a través de CANVAS deveu lliurar únicament l'informe.
+==>El nom del repositori ha de ser 'cognom1-cognom2-Nom-PEC1'. La direcció (URL) del repositori haurà d'esser inclosa a l'informe de manera clara. Teniu en compte que a través de CANVAS heu de lliurar únicament l'informe.
 
 ==> repositori que contingui:
-1) l'informe, 
+1.1) l'informe (que deriva de knit d'R), 
+1.2) el codi R per a l'exploració de les dades degudament comentat (el control de versions del mateix s'ha de realitzar amb Git), 
+1.3) les metadades acompanyades d'una breu descripció en un arxiu markdown
+
 2) l'objecte de classe SummarizedExperiment (que contingui les dades i les metadades en format binari (.Rda)),
-3) el codi R per a l'exploració de les dades degudament comentat (el control de versions del mateix s'ha de realitzar amb Git), 
-4) dades en format text i 
-5) les metadades acompanyades d'una breu descripció en un arxiu markdown
 
-
+3) dades en format text 
 
 L'extensió màxima de l'informe serà de 10 pàgines (sense comptar Annexos) en format PDF.
