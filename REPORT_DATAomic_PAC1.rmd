@@ -134,7 +134,7 @@ rownames(SAMPLE_DATA_ord) <-matriu_metabolica_DATA$`Metabolite_name Factors`
 
 
 ## **4.2 naturalesa (tipus) de les dades** 
-
+### **DATA PREPARATION**
 ### **4.2.1 Creació d'un objecte de classe SummarizedExperiment amb les dades i les metadades**
 
 Aquest objecte té informació sobre el dataset, les seves files i columnes. La classe SummarizedExperiment és una extensió d'ExpressionSet, utilitzada per moltes aplicacions i bases de dades (com és el cas de metabolomicsWorkbench).
@@ -204,7 +204,6 @@ print(taula_sortida)
 
 ## **4.3 metodologia emprada**
 
-
 ## **4.4 eines estadístiques i bioinformàtiques utilitzades**
 https://www.metabolomicsworkbench.org/data/stats_toolbox.php?STUDY_ID=ST003725
 
@@ -220,6 +219,7 @@ https://www.metabolomicsworkbench.org/data/stats_toolbox.php?STUDY_ID=ST003725
 ### *4.4.4 Les eines estadístiques d'exploració de dades: Bioconductor i l'exploració multivariant de dades* 
 
 Font: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.metabolomicsworkbench.org/data/tutorials/NMDR_analysis_tools.pdf
+
 
 ## **4.5 procediment general d'anàlisi**
 
@@ -300,14 +300,55 @@ unique(colData(SUM_exp)$rep <- sapply(parts5_trencat, function(x) x[2]))
 
 
 4) *metadata*: altra informació general com SUBJECT, REST, etc.  
+```{r}
+
+```
 
 
+### **DATA PRE-PROCESSING**
+
+Pas 1: Imputació dels valors que hi manquen
+```{r}
+library(BiocManager)
+#BiocManager::install("POMA", force=TRUE)
+library(POMA)
+library(magrittr)
+SUM_exp_imputed <- SUM_exp %>% 
+  PomaImpute(method = "knn", zeros_as_na = TRUE, remove_na = TRUE, cutoff = 20)
+```
 
 
+Pas 2: Normalització
+```{r}
+SUM_exp_normalized <- SUM_exp_imputed %>% 
+  PomaNorm(method = "log_pareto")
+```
+
+pas 2.1: Comprovació gràfica de la normalització: 
+ABANS: Hi ha una forta variabilitat que pot esser un problema en l'anàlisi en avant
+DESPRÉS: sembla que la normalització log-pareto ha rutllat bé, totes les dades són més uniformes
+```{r}
+library(ggtext)
+PomaBoxplots(SUM_exp_imputed, x = "samples")+
+  ggplot2::theme(axis.text.x = ggplot2::element_blank(),
+                 axis.ticks.x = ggplot2::element_blank())
+
+PomaBoxplots(SUM_exp_normalized, x = "samples")+
+  ggplot2::theme(axis.text.x = ggplot2::element_blank(),
+                 axis.ticks.x = ggplot2::element_blank())
+```
 
 
+Pas 3: detecció d'outliers
+```{r}
+colData(SUM_exp)$group_factor <- as.factor(colData(SUM_exp)$temperatura)
+colData_df <- as.data.frame(colData(SUM_exp_normalized))
+colData_df <- colData_df["group_factor"]
 
+colData(SUM_exp_normalized) <- S4Vectors::DataFrame(colData_df)
 
+PomaOutliers(SUM_exp_normalized)$polygon_plot
+```
 
 
 
