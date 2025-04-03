@@ -1,18 +1,22 @@
 ---
 title: "REPORT DATAomic_PAC1"
-subtitle: "Identification of temperature-sensitive modifications in Thermococcus kodakarensis"
 author: "david graupere"
-date: '`r format(Sys.Date(),"%e de %B, %Y")`'
+date: '`r format(Sys.Date(), "%e de %B, %Y")`'
 output:
-   pdf_document:
-     toc: true
-     toc_depth: 3
-     number_sections: false
-     latex_engine: xelatex 
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: false
+    latex_engine: xelatex
+  html_document:
+    toc: true
+    toc_depth: '3'
+    df_print: paged
+subtitle: "Identification of temperature-sensitive modifications in Thermococcus kodakarensis"
 header-includes:
-  - \usepackage{tocloft}
-  - \setlength{\cftbeforesecskip}{0.5em}
-  - \renewcommand{\cftdot}{}
+- \usepackage{tocloft}
+- \setlength{\cftbeforesecskip}{0.5em}
+- \renewcommand{\cftdot}{}
 ---
 
 
@@ -100,7 +104,7 @@ Ha estat essencial tenir en compte aquests dos docs:
    Revised: 5 Jan, 2023
 
 
-```{r ST003725_AN006111 include=FALSE, results='asis'}
+```{r include=FALSE, results='asis'}
 matriu_metabolica_DATA <- read_delim("C:/Users/graup/Desktop/DATAomic/PAC1/DATA.txt",delim = "\t", escape_double = FALSE,  trim_ws=TRUE,show_col_types = FALSE, col_names = FALSE)
 
 noms_col <- paste0(as.character(matriu_metabolica_DATA[1,]), " ", as.character(matriu_metabolica_DATA[2,]))
@@ -301,7 +305,7 @@ unique(colData(SUM_exp)$rep <- sapply(parts5_trencat, function(x) x[2]))
 
 4) *metadata*: altra informació general com SUBJECT, REST, etc.  
 ```{r}
-
+names(metadata(SUM_exp))
 ```
 
 
@@ -341,13 +345,16 @@ PomaBoxplots(SUM_exp_normalized, x = "samples")+
 
 Pas 3: detecció d'outliers
 ```{r}
-colData(SUM_exp)$group_factor <- as.factor(colData(SUM_exp)$temperatura)
-colData_df <- as.data.frame(colData(SUM_exp_normalized))
-colData_df <- colData_df["group_factor"]
+library(SummarizedExperiment)
+library(POMA)
 
-colData(SUM_exp_normalized) <- S4Vectors::DataFrame(colData_df)
+SUM_exp_final <- SummarizedExperiment::SummarizedExperiment(
+  assays = list(counts=assay(SUM_exp_normalized)),
+  colData = S4Vectors::DataFrame(group=as.factor((colData(SUM_exp_normalized)$temperatura)))
+)
 
-PomaOutliers(SUM_exp_normalized)$polygon_plot
+
+PomaOutliers(SUM_exp_final)$polygon_plot
 ```
 
 
